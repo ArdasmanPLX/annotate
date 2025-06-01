@@ -70,11 +70,6 @@ class DatabaseManager:
             return result[0]
         return None
 
-    def get_annotation(self, image_name):
-        query = "SELECT annotation, is_approved, image_path FROM annotations WHERE image_path LIKE ?"
-        result = self.execute_query(query, ('%' + image_name,), fetch=True)
-        return result[0] if result else None
-
     def get_image_path(self, image_name):
         query = "SELECT image_path FROM annotations WHERE image_path LIKE ?"
         result = self.execute_query(query, ('%' + image_name,), fetch=True)
@@ -99,10 +94,6 @@ class DatabaseManager:
         query = "UPDATE annotations SET is_approved = 1, is_new = 0"
         return self.execute_query(query)
 
-    def get_all_annotations(self):
-        query = "SELECT image_path, annotation, is_new, is_approved FROM annotations"
-        results = self.execute_query(query, fetch=True)
-        return [(os.path.basename(row[0]), row[1], row[2], row[3]) for row in results]
 
     def update_annotation_status(self, image_path, is_approved):
         query = "UPDATE annotations SET is_approved = ?, is_new = 0 WHERE image_path = ?"
