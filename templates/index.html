@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Image Annotation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        form { margin-bottom: 30px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+    </style>
+</head>
+<body>
+<h1>Image Annotation App</h1>
+<h2>Manual Annotation</h2>
+<form action="{{ url_for('annotate_image') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <br>
+    <textarea name="annotation" rows="4" cols="50" placeholder="Annotation" required></textarea>
+    <br>
+    <button type="submit">Save Annotation</button>
+</form>
+<h2>Auto Annotation</h2>
+<form action="{{ url_for('auto_annotate_image') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <br>
+    <textarea name="prompt" rows="4" cols="50">{{ default_prompt }}</textarea>
+    <br>
+    <input type="text" name="model" value="gpt-4-turbo" placeholder="Model">
+    <br>
+    <button type="submit">Auto Annotate</button>
+</form>
+<h2>Saved Annotations</h2>
+<table>
+    <tr><th>Image</th><th>Annotation</th><th>Status</th></tr>
+    {% for path, annotation, is_new, is_approved in annotations %}
+    <tr>
+        <td><img src="{{ url_for('uploaded_file', filename=path.split('/')[-1]) }}" width="100"></td>
+        <td>{{ annotation }}</td>
+        <td>{% if is_approved %}Approved{% elif is_new %}New{% else %}Not Approved{% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
