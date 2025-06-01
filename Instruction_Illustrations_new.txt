@@ -1,0 +1,32 @@
+I want you to act as a high professional prompt engineer.
+I want you to write only the final prompt for FLUX model (<step_7>)
+
+But before you need to complete following Instruction:
+Instruction for describing an image:
+<step_1>Carefully analyze the provided image.</step_1>
+<step_2>Define what is depicted in common.</step_2>
+<step_3>Define the main objects in the image. Describe their position, view, shape, colors, materials of the object, surface property (matt or glossy)</step_3>
+<step_4>Define the secondary objects, if any. Describe their position, view, shape, colors, materials of the object, surface property (matt or glossy)</step_4>
+<step_5>Define the composition and the dynamic arrangement of the objects in the image.</step_5>
+<step_6>Define the interactions between the objects in the image. Define the background. Define the atmosphere or mood of the image. Pay special attention to the light and shadows, and the nature of the lighting. Describe the lighting in detail. Define the interactions between the objects in the image. Pay attention to the time of day, season, natural environment, weather, etc. If there is a character in the image, describe them in detail (appearance, physique, emotions, clothing details). Briefly describe the narrative of the image, if there is a story being told </step_6>
+<step_7>Create a prompt for FLUX model using following structure:
+“gsai, illustration with <main plot of the image>, <Main objects description>, <Secondary objects description>, <Composition and atmosphere description>, background description”
+</step_7>
+
+DO NOT Describe the style. Never use such tokens as "isometric", "cartoon" and "stylized" in the prompt!
+The list of forbidden tokens:
+intricate details, vibrant colors, isometric view, 3D rendering, soft ambient lighting,  3D blender render, soft lighting, physically based rendering
+DO NOT put a period at the end of the prompt.
+DO NOT put the entire prompt in quotes.
+
+Main rule:
+The prompt should not exceed 200 tokens. For counting tokens use the library Byte Pair Encoding. 
+
+A good prompt examples:
+"gsai, illustration with a joyful dance party with three characters in motion. On the left, an elderly slightly plump woman blue eyes and shoulder-length white curled hair and  wearing a knee-length turquoise dress, blue pants, bracelets and heels wrapped in festive holiday lights, dances energetically. In the center in the foreground, an elderly man with clean shaven face and white hair with bald spot wearing a blue star-patterned jacket, white pants and oversized star-shaped sunglasses points upward while kneeling, smiling excitedly. On the right, a younger woman with brown eyes, long brown hair in a sparkling pink sleeveless dress with black belt, golden bracelet and heels dances, also wrapped in lights. DJ turntables in foreground and subtle party equipment, with warm yellow and blue lighting, enhance the festive mood. The background shows soft shadows of dancers and props, creating a lighthearted and energetic party vibe",
+
+"gsai, illustration with two rival chefs in a dramatic cooking competition. The chef on the left has a slim build, light skin, blue eyes, and a neatly groomed dark mustache. He wears a white chef’s hat, white shirt, and blue apron straps, holding a mixing bowl with a wooden spoon. He glares suspiciously at the chef on the right, who is more robust, with a thick brown mustache, raised eyebrows, and intense eyes. This second chef, dressed in a white chef's hat and pink apron straps, holds a shiny red apple and a sharp knife. In the center of the scene, a glowing golden pot with a red ribbon rests on a table, casting a warm light that enhances the chefs' competitive expressions. The background is a soft blend of pink, purple, and yellow, with subtle pastel tones creating an abstract yet tense atmosphere. The glowing pot emphasizes the prize, while the chefs' postures suggest a light-hearted yet determined rivalry, blending tension and playful competition",
+
+“gsai, illustration with a cheerful man and his playful puppy climbed a grassy hill in the sunny countryside. To their right, a wooden sign with a bright blue lightning bolt hints at their destination. The man, with blue eyes, short brown hair, and a neatly trimmed mustache, is dressed in a blue shirt with rolled-up sleeves, tan pants, brown suspenders, and sturdy boots. He carries a pickaxe over his right shoulder, smiling widely, with his gaze directed toward the wooden sign with a bright blue lightning bolt. His wide-brimmed straw hat casts a soft shadow over his face, adding to the light-hearted mood. Beside him, a small brown-and-white puppy with big blue eyes, prick ears, and a wagging tail, wearing a red collar with a golden tag, crouches playfully, its gaze also directed at the wooden sign. The background showcases soft, rolling hills and a vibrant blue sky with fluffy clouds. Sunlight casts gentle shadows over the grassy hill and scattered rocks, enhancing the joyful and energetic mood”,
+
+“gsai, illustration with a cheerful man with blue eyes and a mustache wearing a wide-brimmed brown hat, blue shirt, brown pants, and hiking boots, crouching with a pickaxe in one hand. He smiles excitedly looking to the right. A brown-and-white dog with blue eyes, prick ears and a red collar with a golden tag stands beside him, also looking to the right and wagging its tail. They are surrounded by purple gemstones scattered on the ground. A brown leather backpack lies nearby. The scene takes place in a mountainous landscape with green trees and distant peaks under a bright blue sky with fluffy clouds. Soft lighting enhances the adventurous, playful atmosphere”

@@ -1,0 +1,24 @@
+I want you to act as a high professional prompt engineer.
+I want you to write only the final prompt for FLUX model (<step_7>)
+
+But before you need to complete following Instruction:
+Instruction for describing an image:
+<step_1>Carefully analyze the provided image.</step_1>
+<step_2>Define what is depicted in common.</step_2>
+<step_3>Define the main objects in the image. Describe their position, view, shape, colors, materials of the object, surface property (matt or glossy)</step_3>
+<step_4>Define the secondary objects, if any. Describe their position, view, shape, colors, materials of the object, surface property (matt or glossy)</step_4>
+<step_5>Define the composition of the image</step_5>
+<step_6>Define the interactions between the objects in the image </step_6>
+<step_7>Create a prompt for FLUX model using following structure:
+“gsai, <Main objects description>, <Secondary objects description>, <Composition description>, the gray background”
+</step_7>
+
+
+DO NOT Describe the style. Never use such tokens as "isometric", "cartoon" and "stylized" in the prompt!
+The list of forbidden tokens:
+intricate details, vibrant colors, isometric view, 3D rendering, soft ambient lighting,  3D blender render, soft lighting, physically based rendering
+DO NOT put a period at the end of the prompt.
+DO NOT put the entire prompt in quotes.
+
+Main rule:
+The prompt should not exceed 130 tokens. For counting tokens use the library Byte Pair Encoding.

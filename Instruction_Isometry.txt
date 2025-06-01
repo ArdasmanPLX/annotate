@@ -1,0 +1,31 @@
+I want you to act as a high professional prompt engineer.
+I want you to write only the final prompt for FLUX model (<step_7>)
+
+But before you need to complete following Instruction:
+Instruction for describing an image:
+<step_1>Carefully analyze the provided image.</step_1>
+<step_2>Define what is depicted in common.</step_2>
+<step_3>Define the main objects in the image. Describe their position, view, shape, colors, materials of the object, surface property (matt or glossy)</step_3>
+<step_4>Define the secondary objects, if any. Describe their position, view, shape, colors, materials of the object, surface property (matt or glossy)</step_4>
+<step_5>Define the composition of the image</step_5>
+<step_6>Define the interactions between the objects in the image </step_6>
+<step_7>Create a prompt for FLUX model using following structure:
+“gsai, <Main objects description>, <Secondary objects description>, <Composition description>, the gray background”
+</step_7>
+
+
+DO NOT Describe the style. Never use such tokens as "isometric", "cartoon" and "stylized" in the prompt!
+The list of forbidden tokens:
+intricate details, vibrant colors, isometric view, 3D rendering, soft ambient lighting,  3D blender render, soft lighting, physically based rendering
+DO NOT put a period at the end of the prompt.
+DO NOT put the entire prompt in quotes.
+
+Main rule:
+The prompt should not exceed 255 tokens. For counting tokens use the library Byte Pair Encoding. 
+
+A good prompt examples:
+"gsai, a strong minotaur figure stands confidently, adorned with a red cape and a white embellished chest plate. It leans on a double-headed axe. Beside it, a classical stone column structure with intricate carvings; green vines and vibrant purple grapes entwine the columns. At the figure's feet, a cornucopia spills purple grapes, golden coins, and pink gemstones, with a strand of white pearls lying gracefully. The scene is set on a round stone platform surrounded by lush green leaves, adding depth and contrast, the gray background",
+
+"gsai, a colorful skate ramp with a smooth, white curved surface, accentuated by bold orange edges. The ramp features a sturdy orange railing at the top for safety. In the foreground, a set of vibrant blue and yellow stairs leads up to the ramp, bordered by a small patch of green grass and a playful traffic cone. To the right, the wall is adorned with lively graffiti art depicting abstract shapes and a smiling green character, illuminated by bright spotlights above, casting subtle shadows, thehe gray background",
+
+“gsai, a candy-themed van with a vivid pink roof adorned with a giant pink and white spiral lollipop. Brightly colored doughnut on top contrasts against the smooth, purple exterior of the van. The front lights are round, emitting a warm glow, enhancing the whimsical feel. Icy designs on the body, with candy-cane-striped poles beside it. Two large, glossy red candy apples with sticks stand in front of the van. A marshmallow rests on a golden syrup-like puddle that forms a glossy base, with fluffy cream and scattered chocolate balls accentuating the scene, the gray background”

@@ -1,0 +1,40 @@
+I want you to act as a high professional prompt engineer. You make best prompt for FLUX models. Your goal is to make captions for future dataset.
+Instruction for describing an image:
+<step_1>Carefully analyze the provided image.
+</step_1>
+<step_2>Define the object. Describe its position, view, shape, colors, materials of the object, surface property (matt or glossy) </step_2>
+<step_3>Create a prompt for FLUX model using following structure:
+“gsai, a {view}” of <object>. <Object description>”
+</step_3>
+
+
+{view}:
+top-down view
+low-angle view
+side view
+frontal view
+high-angle view
+tilted top-down view
+
+
+<Object description> must include the shape, colors, materials of the object, surface property (matt or glossy).
+
+
+
+
+DO NOT Describe the background.
+DO NOT Put a period at the end.
+DO NOT use quotation marks.
+DO NOT Describe the style. Never use tokens "cartoon" and "stylized" in the description!
+The list of forbidden tokens:
+intricate details, vibrant colors, isometric view, 3D rendering, soft ambient lighting,  3D blender render, soft lighting, physically based rendering
+
+Main rule:
+The prompt should not exceed 255 tokens. For counting tokens use the library Byte Pair Encoding.
+
+A good prompt examples:
+"gsai, a top-down view of a square beige flower bed with rounded corners containing bright purple lilies, surrounded by green leaves. The glossy flowers and leaves are neatly arranged"
+"gsai, a frontal view of a glossy red folded shirt with a light pink collar, decorated with multiple pink heart patterns and a small yellow button",
+"gsai, a frontal view of a small matt purple bat with a rounded body, curved ears, expressive eyes, a cheerful mouth, and wide, smooth wings",
+"gsai, a side view of A rounded glossy wooden barrel segmented into planks with metallic bands. It features bold yellow "TNT" lettering on its side and a curved yellow fuse extending from the top",
+"gsai, a tilted top-down view of a matte blue and white fishing float with a rounded body, a pink cylindrical top, and a small pointed bottom"
