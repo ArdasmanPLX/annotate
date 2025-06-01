@@ -3,12 +3,30 @@ import json
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox,
                              QListWidget, QListWidgetItem, QProgressBar, QGroupBox, QComboBox, QDialog,
-                             QRadioButton, QButtonGroup, QLineEdit)
+                             QRadioButton, QButtonGroup, QLineEdit, QFormLayout)
 from PyQt5.QtGui import QPixmap, QColor, QDragEnterEvent, QDropEvent
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from database import DatabaseManager
 from annotation import AnnotationManager
-from config import DEFAULT_PROMPT
+from config import DEFAULT_PROMPT, COMFY_DEFAULTS
+from comfy_client import ComfyUIClient
+
+SETTINGS_FILE = "comfy_settings.json"
+
+
+def load_generation_settings():
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return COMFY_DEFAULTS.copy()
+
+
+def save_generation_settings(settings: dict):
+    with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+        json.dump(settings, f, ensure_ascii=False, indent=4)
 
 #DragDrop
 class DragDropLabel(QLabel):
@@ -102,6 +120,80 @@ class PromptDialog(QDialog):
         else:
             return self.prompt_text.toPlainText() if self.file_path_input.text() else DEFAULT_PROMPT
 
+
+class GenerationSettingsDialog(QDialog):
+    def __init__(self, settings: dict, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Generation Settings")
+        self.setGeometry(200, 200, 400, 300)
+
+        layout = QVBoxLayout()
+        form = QFormLayout()
+
+        self.server_edit = QLineEdit(settings.get("server", ""))
+        self.model_edit = QLineEdit(settings.get("model", ""))
+        self.width_edit = QLineEdit(str(settings.get("width", 512)))
+        self.height_edit = QLineEdit(str(settings.get("height", 512)))
+        self.steps_edit = QLineEdit(str(settings.get("steps", 20)))
+
+        form.addRow("Server", self.server_edit)
+        form.addRow("Model", self.model_edit)
+        form.addRow("Width", self.width_edit)
+        form.addRow("Height", self.height_edit)
+        form.addRow("Steps", self.steps_edit)
+
+        layout.addLayout(form)
+        layout.addWidget(QLabel("Workflow JSON:"))
+        self.workflow_edit = QTextEdit()
+        self.workflow_edit.setPlainText(settings.get("workflow", ""))
+        layout.addWidget(self.workflow_edit)
+
+        btn_layout = QHBoxLayout()
+        ok_btn = QPushButton("OK")
+        ok_btn.clicked.connect(self.accept)
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(ok_btn)
+        btn_layout.addWidget(cancel_btn)
+        layout.addLayout(btn_layout)
+
+        self.setLayout(layout)
+
+    def get_settings(self) -> dict:
+        return {
+            "server": self.server_edit.text(),
+            "model": self.model_edit.text(),
+            "width": int(self.width_edit.text() or 0),
+            "height": int(self.height_edit.text() or 0),
+            "steps": int(self.steps_edit.text() or 0),
+            "workflow": self.workflow_edit.toPlainText(),
+        }
+
+
+class GenerateImageThread(QThread):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+
+    def __init__(self, client: ComfyUIClient, prompt: str, settings: dict):
+        super().__init__()
+        self.client = client
+        self.prompt = prompt
+        self.settings = settings
+
+    def run(self):
+        try:
+            path = self.client.generate_image(
+                self.prompt,
+                self.settings.get("model", ""),
+                self.settings.get("width", 512),
+                self.settings.get("height", 512),
+                self.settings.get("steps", 20),
+                self.settings.get("workflow", ""),
+            )
+            self.finished.emit(path)
+        except Exception as e:
+            self.error.emit(str(e))
+
 class SingleAnnotationThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
@@ -155,6 +247,8 @@ class ImageAnnotationApp(QMainWindow):
         super().__init__()
         self.db_manager = DatabaseManager()
         self.annotation_manager = AnnotationManager()
+        self.generation_settings = load_generation_settings()
+        self.comfy_client = ComfyUIClient(self.generation_settings.get("server", ""))
         self.init_ui()
 
     def init_ui(self):
@@ -179,10 +273,12 @@ class ImageAnnotationApp(QMainWindow):
         button_layout = QHBoxLayout()
         manual_group = QGroupBox("Manual Annotation")
         llm_group = QGroupBox("LLM Annotation")
+        generate_group = QGroupBox("Image Generation")
         database_group = QGroupBox("Image Data Base")
 
         manual_layout = QHBoxLayout()
         llm_layout = QHBoxLayout()
+        generate_layout = QHBoxLayout()
         database_layout = QHBoxLayout()
 
         self.load_button = QPushButton("Load Image")
@@ -200,6 +296,14 @@ class ImageAnnotationApp(QMainWindow):
         self.folder_annotate_button = QPushButton("Annotate Folder")
         self.folder_annotate_button.clicked.connect(self.annotate_folder)
         llm_layout.addWidget(self.folder_annotate_button)
+
+        self.generate_button = QPushButton("Generate")
+        self.generate_button.clicked.connect(self.generate_image)
+        generate_layout.addWidget(self.generate_button)
+
+        self.gen_settings_button = QPushButton("Generation Settings")
+        self.gen_settings_button.clicked.connect(self.open_generation_settings)
+        generate_layout.addWidget(self.gen_settings_button)
 
         self.clear_db_button = QPushButton("Clear Database")
         self.clear_db_button.clicked.connect(self.clear_database)
@@ -228,10 +332,12 @@ class ImageAnnotationApp(QMainWindow):
 
         manual_group.setLayout(manual_layout)
         llm_group.setLayout(llm_layout)
+        generate_group.setLayout(generate_layout)
         database_group.setLayout(database_layout)
 
         button_layout.addWidget(manual_group)
         button_layout.addWidget(llm_group)
+        button_layout.addWidget(generate_group)
         button_layout.addWidget(database_group)
 
         main_layout.addLayout(button_layout)
@@ -730,3 +836,47 @@ class ImageAnnotationApp(QMainWindow):
             self.progress_label.setVisible(True)
         if current == total:
             self.progress_label.setVisible(False)
+
+    def open_generation_settings(self):
+        dialog = GenerationSettingsDialog(self.generation_settings, self)
+        if dialog.exec():
+            self.generation_settings = dialog.get_settings()
+            save_generation_settings(self.generation_settings)
+            self.comfy_client.set_server(self.generation_settings.get("server", ""))
+
+    def generate_image(self):
+        prompt = self.annotation_text.toPlainText().strip()
+        if not prompt:
+            QMessageBox.warning(self, "Error", "No annotation text to generate.")
+            return
+
+        self.progress_bar.setVisible(True)
+        self.progress_label.setVisible(True)
+        self.progress_bar.setRange(0, 0)
+        self.progress_label.setText("Generating image...")
+        self.generate_button.setEnabled(False)
+
+        self.gen_thread = GenerateImageThread(self.comfy_client, prompt, self.generation_settings)
+        self.gen_thread.finished.connect(self.show_generated_image)
+        self.gen_thread.error.connect(self.generate_error)
+        self.gen_thread.start()
+
+    def show_generated_image(self, path: str):
+        self.progress_bar.setVisible(False)
+        self.progress_label.setVisible(False)
+        self.generate_button.setEnabled(True)
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Generated Image")
+        layout = QVBoxLayout(dlg)
+        label = QLabel()
+        pix = QPixmap(path)
+        label.setPixmap(pix.scaled(512, 512, Qt.AspectRatioMode.KeepAspectRatio))
+        layout.addWidget(label)
+        dlg.exec()
+
+    def generate_error(self, msg: str):
+        self.progress_bar.setVisible(False)
+        self.progress_label.setVisible(False)
+        self.generate_button.setEnabled(True)
+        QMessageBox.warning(self, "Error", f"Failed to generate image: {msg}")
+
