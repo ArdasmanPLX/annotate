@@ -1,8 +1,8 @@
 import base64
 from openai import OpenAI
-from config import OPENAI_API_KEY
+from key_manager import get_openai_api_key
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=get_openai_api_key())
 
 class AnnotationManager:
     @staticmethod
