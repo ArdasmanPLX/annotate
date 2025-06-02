@@ -27,14 +27,27 @@ def decrypt_string(enc_text: str, secret: str = SECRET) -> str:
 
 
 def get_openai_api_key() -> str:
+    """Retrieve the OpenAI API key.
+
+    The key is loaded from the ``OPENAI_API_KEY`` environment variable if
+    available. Otherwise it is read from ``openai.key`` and decrypted. If the
+    file does not exist the user is prompted to enter a key which will then be
+    stored encrypted.
+    """
+
+    env_key = os.getenv("OPENAI_API_KEY")
+    if env_key:
+        return env_key
+
     if os.path.exists(API_KEY_FILE):
-        with open(API_KEY_FILE, "r") as f:
+        with open(API_KEY_FILE, "r", encoding="utf-8") as f:
             encrypted = f.read().strip()
         try:
             return decrypt_string(encrypted)
         except Exception:
             pass
+
     key = input("Enter OpenAI API key: ").strip()
-    with open(API_KEY_FILE, "w") as f:
+    with open(API_KEY_FILE, "w", encoding="utf-8") as f:
         f.write(encrypt_string(key))
     return key
