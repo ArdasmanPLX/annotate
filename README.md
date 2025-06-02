@@ -18,6 +18,12 @@ Run the following command to start the Gradio interface:
 python gradio_app.py
 ```
 
+Set the `OPENAI_API_KEY` environment variable to avoid interactive prompts:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+```
+
 The interface exposes:
 
 - **Manual Annotation** – upload an image and manually enter annotation text.
