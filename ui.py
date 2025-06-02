@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
 from PyQt5.QtGui import QPixmap, QColor, QDragEnterEvent, QDropEvent
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from database import DatabaseManager
-from annotation import AnnotationManager
+from annotation import AnnotationManager, available_models
 from config import DEFAULT_PROMPT, COMFY_DEFAULTS
 from comfy_client import ComfyUIClient
 
@@ -263,7 +263,8 @@ class ImageAnnotationApp(QMainWindow):
         model_layout = QHBoxLayout()
         model_layout.addWidget(QLabel("LLM Model:"))
         self.model_combo = QComboBox()
-        self.model_combo.addItems(["chatgpt-4o-latest", "o1-mini", "gpt-4o-mini", "o1-preview", "gpt-4-turbo"])
+        models = available_models() or ["gpt-4-turbo"]
+        self.model_combo.addItems(models)
         self.model_combo.setFixedWidth(200)
         model_layout.addWidget(self.model_combo)
         model_layout.addStretch()

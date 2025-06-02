@@ -2,7 +2,7 @@ import os
 import json
 import gradio as gr
 from database import DatabaseManager
-from annotation import AnnotationManager
+from annotation import AnnotationManager, available_models
 from comfy_client import ComfyUIClient
 from config import DEFAULT_PROMPT, COMFY_DEFAULTS
 
@@ -12,10 +12,7 @@ _annotator = AnnotationManager()
 _generation_settings = COMFY_DEFAULTS.copy()
 _comfy = ComfyUIClient(_generation_settings.get("server", ""))
 
-MODELS = [
-    "chatgpt-4o-latest",
-    "gpt-4-turbo",
-]
+MODELS = available_models() or ["gpt-4-turbo"]
 
 
 def _refresh_list():
