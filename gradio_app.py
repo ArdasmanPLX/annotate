@@ -1,3 +1,4 @@
+import os
 import gradio as gr
 from database import DatabaseManager
 from annotation import AnnotationManager
@@ -57,7 +58,9 @@ def build_interface():
 
 def main():
     iface = build_interface()
-    iface.launch()
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "7860"))
+    iface.launch(server_name=host, server_port=port)
 
 
 if __name__ == "__main__":
