@@ -1,0 +1,4 @@
+openai
+PyQt5
+requests
+gradio
