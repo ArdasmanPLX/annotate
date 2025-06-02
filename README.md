@@ -18,6 +18,10 @@ Run the following command to start the Gradio interface:
 python gradio_app.py
 ```
 
+Set the `HOST` and `PORT` environment variables to control where the
+web server listens. By default, the app binds to `0.0.0.0` on port
+`7860`, making it accessible on public platforms like Runpod.
+
 Set the `OPENAI_API_KEY` environment variable to avoid interactive prompts:
 
 ```bash
