@@ -4,6 +4,17 @@ from key_manager import get_openai_api_key
 
 client = OpenAI(api_key=get_openai_api_key())
 
+
+def available_models() -> list[str]:
+    """Return a list of model identifiers available to the API key.
+
+    If the request fails, an empty list is returned.
+    """
+    try:  # pragma: no cover - network call
+        return [m.id for m in client.models.list().data]
+    except Exception:
+        return []
+
 class AnnotationManager:
     @staticmethod
     def generate_annotation(image_path: str, prompt: str, model: str) -> str:
