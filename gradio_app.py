@@ -220,7 +220,7 @@ def build_interface():
             steps_in = gr.Number(value=_generation_settings.get("steps", 20), label="Шаги (Steps)")
             width_in = gr.Number(value=_generation_settings.get("width", 512), label="Ширина")
             height_in = gr.Number(value=_generation_settings.get("height", 512), label="Высота")
-            annotation_disp = gr.Textbox(lines=8, interactive=False, label="Аннотация")
+            annotation_disp = gr.Textbox(lines=8, interactive=True, label="Аннотация")
             gen_btn = gr.Button("Generate")
             output_img = gr.Image(label="Result")
             with gr.Column():
