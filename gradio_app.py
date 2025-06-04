@@ -140,16 +140,24 @@ def select_from_list(name_with_status):
     return path, annotation, bool(is_app), "Loaded"
 
 
-def generate_image(server, model, steps, width, height, annotation_text):
+def generate_image(server, model, steps, width, height, annotation_text, workflow_file):
+    workflow = ""
+    if workflow_file is not None:
+        try:
+            with open(workflow_file.name, "r", encoding="utf-8") as f:
+                workflow = f.read()
+        except Exception:
+            workflow = ""
     _generation_settings.update({
         "server": server,
         "model": model,
         "steps": steps,
         "width": width,
         "height": height,
+        "workflow": workflow,
     })
     _comfy.set_server(server)
-    return _comfy.generate_image(annotation_text, model, width, height, steps, "")
+    return _comfy.generate_image(annotation_text, model, width, height, steps, workflow)
 
 
 def build_interface():
@@ -226,6 +234,7 @@ def build_interface():
             width_in = gr.Number(value=_generation_settings.get("width", 512), label="Ширина")
             height_in = gr.Number(value=_generation_settings.get("height", 512), label="Высота")
             annotation_disp = gr.Textbox(lines=8, interactive=True, label="Аннотация")
+            workflow_in = gr.File(file_types=[".json"], label="Workflow JSON")
             gen_btn = gr.Button("Generate")
             output_img = gr.Image(label="Result")
             with gr.Column():
@@ -236,7 +245,7 @@ def build_interface():
                 gen_list,
                 [current_image, annotation_disp, gen_state, status],
             )
-            gen_btn.click(generate_image, [server_in, model_in, steps_in, width_in, height_in, annotation_disp], output_img)
+            gen_btn.click(generate_image, [server_in, model_in, steps_in, width_in, height_in, annotation_disp, workflow_in], output_img)
             demo.load(_refresh_list, None, gen_list)
 
     return demo
