@@ -8,5 +8,14 @@ COMFY_DEFAULTS = {
     "width": 512,
     "height": 512,
     "steps": 20,
-    "workflow": ""
+    "seed": None,
+    "workflow": "",
+    "fields": {
+        "prompt": {"key": "text", "node": ""},
+        "model": {"key": "ckpt_name", "node": ""},
+        "width": {"key": "width", "node": ""},
+        "height": {"key": "height", "node": ""},
+        "steps": {"key": "steps", "node": ""},
+        "seed": {"key": "seed", "node": ""},
+    },
 }

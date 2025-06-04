@@ -18,7 +18,13 @@ def load_generation_settings():
     if os.path.exists(SETTINGS_FILE):
         try:
             with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                settings = COMFY_DEFAULTS.copy()
+                settings.update({k: data.get(k, v) for k, v in COMFY_DEFAULTS.items() if k != "fields"})
+                fields = COMFY_DEFAULTS["fields"].copy()
+                fields.update(data.get("fields", {}))
+                settings["fields"] = fields
+                return settings
         except Exception:
             pass
     return COMFY_DEFAULTS.copy()
@@ -135,12 +141,40 @@ class GenerationSettingsDialog(QDialog):
         self.width_edit = QLineEdit(str(settings.get("width", 512)))
         self.height_edit = QLineEdit(str(settings.get("height", 512)))
         self.steps_edit = QLineEdit(str(settings.get("steps", 20)))
+        self.seed_edit = QLineEdit(str(settings.get("seed") or ""))
+
+        fields = settings.get("fields", {})
+        self.prompt_key = QLineEdit(fields.get("prompt", {}).get("key", "text"))
+        self.prompt_node = QLineEdit(str(fields.get("prompt", {}).get("node", "")))
+        self.model_key = QLineEdit(fields.get("model", {}).get("key", "ckpt_name"))
+        self.model_node = QLineEdit(str(fields.get("model", {}).get("node", "")))
+        self.width_key = QLineEdit(fields.get("width", {}).get("key", "width"))
+        self.width_node = QLineEdit(str(fields.get("width", {}).get("node", "")))
+        self.height_key = QLineEdit(fields.get("height", {}).get("key", "height"))
+        self.height_node = QLineEdit(str(fields.get("height", {}).get("node", "")))
+        self.steps_key = QLineEdit(fields.get("steps", {}).get("key", "steps"))
+        self.steps_node = QLineEdit(str(fields.get("steps", {}).get("node", "")))
+        self.seed_key = QLineEdit(fields.get("seed", {}).get("key", "seed"))
+        self.seed_node = QLineEdit(str(fields.get("seed", {}).get("node", "")))
 
         form.addRow("Server", self.server_edit)
         form.addRow("Model", self.model_edit)
         form.addRow("Width", self.width_edit)
         form.addRow("Height", self.height_edit)
         form.addRow("Steps", self.steps_edit)
+        form.addRow("Seed", self.seed_edit)
+        form.addRow("Prompt field", self.prompt_key)
+        form.addRow("Prompt node", self.prompt_node)
+        form.addRow("Model field", self.model_key)
+        form.addRow("Model node", self.model_node)
+        form.addRow("Width field", self.width_key)
+        form.addRow("Width node", self.width_node)
+        form.addRow("Height field", self.height_key)
+        form.addRow("Height node", self.height_node)
+        form.addRow("Steps field", self.steps_key)
+        form.addRow("Steps node", self.steps_node)
+        form.addRow("Seed field", self.seed_key)
+        form.addRow("Seed node", self.seed_node)
 
         layout.addLayout(form)
         layout.addWidget(QLabel("Workflow JSON:"))
@@ -166,7 +200,16 @@ class GenerationSettingsDialog(QDialog):
             "width": int(self.width_edit.text() or 0),
             "height": int(self.height_edit.text() or 0),
             "steps": int(self.steps_edit.text() or 0),
+            "seed": int(self.seed_edit.text() or 0) if self.seed_edit.text() else None,
             "workflow": self.workflow_edit.toPlainText(),
+            "fields": {
+                "prompt": {"key": self.prompt_key.text(), "node": self.prompt_node.text()},
+                "model": {"key": self.model_key.text(), "node": self.model_node.text()},
+                "width": {"key": self.width_key.text(), "node": self.width_node.text()},
+                "height": {"key": self.height_key.text(), "node": self.height_node.text()},
+                "steps": {"key": self.steps_key.text(), "node": self.steps_node.text()},
+                "seed": {"key": self.seed_key.text(), "node": self.seed_node.text()},
+            },
         }
 
 
@@ -189,6 +232,8 @@ class GenerateImageThread(QThread):
                 self.settings.get("height", 512),
                 self.settings.get("steps", 20),
                 self.settings.get("workflow", ""),
+                self.settings.get("seed"),
+                self.settings.get("fields"),
             )
             self.finished.emit(path)
         except Exception as e:

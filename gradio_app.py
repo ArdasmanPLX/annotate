@@ -140,7 +140,28 @@ def select_from_list(name_with_status):
     return path, annotation, bool(is_app), "Loaded"
 
 
-def generate_image(server, model, steps, width, height, annotation_text, workflow_file):
+def generate_image(
+    server,
+    model,
+    steps,
+    width,
+    height,
+    seed,
+    annotation_text,
+    workflow_file,
+    prompt_key,
+    prompt_node,
+    model_key,
+    model_node,
+    width_key,
+    width_node,
+    height_key,
+    height_node,
+    steps_key,
+    steps_node,
+    seed_key,
+    seed_node,
+):
     workflow = ""
     if workflow_file is not None:
         try:
@@ -154,10 +175,28 @@ def generate_image(server, model, steps, width, height, annotation_text, workflo
         "steps": steps,
         "width": width,
         "height": height,
+        "seed": seed,
         "workflow": workflow,
+        "fields": {
+            "prompt": {"key": prompt_key, "node": prompt_node},
+            "model": {"key": model_key, "node": model_node},
+            "width": {"key": width_key, "node": width_node},
+            "height": {"key": height_key, "node": height_node},
+            "steps": {"key": steps_key, "node": steps_node},
+            "seed": {"key": seed_key, "node": seed_node},
+        },
     })
     _comfy.set_server(server)
-    return _comfy.generate_image(annotation_text, model, width, height, steps, workflow)
+    return _comfy.generate_image(
+        annotation_text,
+        model,
+        width,
+        height,
+        steps,
+        workflow,
+        seed,
+        _generation_settings["fields"],
+    )
 
 
 def build_interface():
@@ -233,6 +272,21 @@ def build_interface():
             steps_in = gr.Number(value=_generation_settings.get("steps", 20), label="Шаги (Steps)")
             width_in = gr.Number(value=_generation_settings.get("width", 512), label="Ширина")
             height_in = gr.Number(value=_generation_settings.get("height", 512), label="Высота")
+            seed_in = gr.Number(value=_generation_settings.get("seed"), label="Seed", precision=0)
+
+            prompt_key_in = gr.Textbox(value=_generation_settings["fields"]["prompt"]["key"], label="Prompt field")
+            prompt_node_in = gr.Textbox(value=_generation_settings["fields"]["prompt"]["node"], label="Prompt node")
+            model_key_in = gr.Textbox(value=_generation_settings["fields"]["model"]["key"], label="Model field")
+            model_node_in = gr.Textbox(value=_generation_settings["fields"]["model"]["node"], label="Model node")
+            width_key_in = gr.Textbox(value=_generation_settings["fields"]["width"]["key"], label="Width field")
+            width_node_in = gr.Textbox(value=_generation_settings["fields"]["width"]["node"], label="Width node")
+            height_key_in = gr.Textbox(value=_generation_settings["fields"]["height"]["key"], label="Height field")
+            height_node_in = gr.Textbox(value=_generation_settings["fields"]["height"]["node"], label="Height node")
+            steps_key_in = gr.Textbox(value=_generation_settings["fields"]["steps"]["key"], label="Steps field")
+            steps_node_in = gr.Textbox(value=_generation_settings["fields"]["steps"]["node"], label="Steps node")
+            seed_key_in = gr.Textbox(value=_generation_settings["fields"]["seed"]["key"], label="Seed field")
+            seed_node_in = gr.Textbox(value=_generation_settings["fields"]["seed"]["node"], label="Seed node")
+
             annotation_disp = gr.Textbox(lines=8, interactive=True, label="Аннотация")
             workflow_in = gr.File(file_types=[".json"], label="Workflow JSON")
             gen_btn = gr.Button("Generate")
@@ -245,7 +299,32 @@ def build_interface():
                 gen_list,
                 [current_image, annotation_disp, gen_state, status],
             )
-            gen_btn.click(generate_image, [server_in, model_in, steps_in, width_in, height_in, annotation_disp, workflow_in], output_img)
+            gen_btn.click(
+                generate_image,
+                [
+                    server_in,
+                    model_in,
+                    steps_in,
+                    width_in,
+                    height_in,
+                    seed_in,
+                    annotation_disp,
+                    workflow_in,
+                    prompt_key_in,
+                    prompt_node_in,
+                    model_key_in,
+                    model_node_in,
+                    width_key_in,
+                    width_node_in,
+                    height_key_in,
+                    height_node_in,
+                    steps_key_in,
+                    steps_node_in,
+                    seed_key_in,
+                    seed_node_in,
+                ],
+                output_img,
+            )
             demo.load(_refresh_list, None, gen_list)
 
     return demo
