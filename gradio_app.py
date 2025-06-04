@@ -155,6 +155,8 @@ def generate_image(server, model, steps, width, height, annotation_text):
 def build_interface():
     with gr.Blocks() as demo:
         current_image = gr.State()
+        # placeholder state for generation tab selections
+        gen_state = gr.State()
         status = gr.Textbox(label="Status", interactive=False)
 
         with gr.Tab("Аннотации"):
@@ -195,7 +197,7 @@ def build_interface():
                                show_progress=False).then(lambda p: p, None, current_image)
             save_btn.click(save_annotation, [current_image, annotation_box], status)
             annotate_btn.click(auto_annotate, [current_image, prompt_box, model_select], [annotation_box, status])
-            folder_input.change(annotate_folder, [folder_input, prompt_box, model_select], status)
+            folder_input.change(annotate_folder, [folder_input, prompt_box, model_select], status).then(_refresh_list, None, annotation_list, queue=False)
             approve_btn.click(approve_annotation, current_image, status)
             approve_all_btn.click(lambda: approve_all(), None, status)
             not_approve_btn.click(not_approve_annotation, current_image, status)
@@ -205,11 +207,17 @@ def build_interface():
             delete_btn.click(delete_annotation, current_image, status)
             gen_txt_btn.click(generate_text_files, None, status)
             export_btn.click(export_database, None, status)
-            import_file.change(import_database, import_file, status)
+            import_file.change(import_database, import_file, status).then(_refresh_list, None, annotation_list, queue=False)
             annotation_list.change(select_from_list, annotation_list, [preview, annotation_box, approve_btn, status]).then(lambda p: p, None, current_image)
             demo.load(_refresh_list, None, annotation_list)
-            for btn in [save_btn, annotate_btn, folder_input, clear_db_btn, delete_btn, gen_txt_btn, export_btn, import_file, approve_btn, approve_all_btn, not_approve_btn, save_changes_btn]:
+
+            # Refresh list after button actions
+            for btn in [save_btn, annotate_btn, clear_db_btn, delete_btn, gen_txt_btn,
+                        export_btn, approve_btn, approve_all_btn, not_approve_btn,
+                        save_changes_btn]:
                 btn.click(_refresh_list, None, annotation_list, queue=False)
+
+            # File components trigger refresh after handling events above
 
         with gr.Tab("Генерация изображений"):
             server_in = gr.Textbox(value=_generation_settings["server"], label="Сервер генерации ComfyUI")
@@ -223,7 +231,11 @@ def build_interface():
             with gr.Column():
                 gen_list = gr.Dropdown(choices=[], label="Annotations")
 
-            gen_list.change(select_from_list, gen_list, [None, annotation_disp, None, status]).then(lambda p: p, None, current_image)
+            gen_list.change(
+                select_from_list,
+                gen_list,
+                [current_image, annotation_disp, gen_state, status],
+            )
             gen_btn.click(generate_image, [server_in, model_in, steps_in, width_in, height_in, annotation_disp], output_img)
             demo.load(_refresh_list, None, gen_list)
 
