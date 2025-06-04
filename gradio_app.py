@@ -155,6 +155,8 @@ def generate_image(server, model, steps, width, height, annotation_text):
 def build_interface():
     with gr.Blocks() as demo:
         current_image = gr.State()
+        # placeholder state for generation tab selections
+        gen_state = gr.State()
         status = gr.Textbox(label="Status", interactive=False)
 
         with gr.Tab("Аннотации"):
@@ -229,7 +231,11 @@ def build_interface():
             with gr.Column():
                 gen_list = gr.Dropdown(choices=[], label="Annotations")
 
-            gen_list.change(select_from_list, gen_list, [None, annotation_disp, None, status]).then(lambda p: p, None, current_image)
+            gen_list.change(
+                select_from_list,
+                gen_list,
+                [current_image, annotation_disp, gen_state, status],
+            )
             gen_btn.click(generate_image, [server_in, model_in, steps_in, width_in, height_in, annotation_disp], output_img)
             demo.load(_refresh_list, None, gen_list)
 
