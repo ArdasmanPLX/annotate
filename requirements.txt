@@ -2,3 +2,4 @@ openai
 PyQt5
 requests
 gradio
+websocket-client
